@@ -1,0 +1,15 @@
+uvicorn
+gunicorn
+fastapi
+python-multipart
+psycopg2-binary
+configparser
+passlib
+python-jose
+pycryptodome
+alembic
+datetime
+celery
+flower
+redis==5.2.1
+numpy

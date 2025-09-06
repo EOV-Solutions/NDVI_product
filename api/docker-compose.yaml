@@ -1,0 +1,23 @@
+services:
+  # API    
+  ndvi-inference:
+    container_name: api-ndvi-inference
+    build:
+      dockerfile: Dockerfile
+      context: .
+    restart: unless-stopped
+    command: sh -c "cd api/ && uvicorn main:app --host 0.0.0.0 --port 8082 --workers 3"
+    volumes:
+      - /mnt/storage/docker_storage/deepvision_worker/ndvi_inference/data:/storages/
+      - /mnt/storage/docker_storage/deepvision_worker/ndvi_inference/api_logs:/logs/
+    ports:
+     - 8082:8082
+    networks:
+     - mlnet
+
+networks:
+  mlnet:
+    external: true
+
+volumes:
+  api-logs:

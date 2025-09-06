@@ -1,0 +1,72 @@
+version: '3.10'
+
+services:
+  celery:
+      container_name: celery_worker_ndvi
+      deploy:
+        resources:
+          reservations:
+            devices:
+              - driver: nvidia
+                count: 1
+                capabilities: [gpu]
+
+      build:
+        dockerfile: Dockerfile
+        context: .
+      restart: unless-stopped
+      command: sh -c "cd celery_worker/ && celery -A tasks worker --loglevel=info --concurrency=1 --pool=solo -n ppe_worker -E --logfile=/celery.log && cd ../"
+      networks:
+        - mlnet
+
+  redis:
+    image: redis
+    container_name: redis
+    restart: unless-stopped
+    command: redis-server --requirepass password
+    volumes:
+      - redis-data:/data
+    ports:
+     - 6379:6379
+    networks:
+     - mlnet
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"    
+      - "15672:15672"   
+    environment:
+      RRABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+      RABBITMQ_DEFAULT_VHOST: /
+
+    networks:
+      - mlnet
+    volumes:
+      - rabbitmq-data:/data
+  minio:
+    image: quay.io/minio/minio    
+    container_name: minio
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: ROOTNAME 
+      MINIO_ROOT_PASSWORD: CHANGEME123
+    networks:
+      - mlnet
+    volumes:
+      - minio-data:/data
+
+
+networks:
+  mlnet:
+    external: true
+
+volumes:
+  minio-data:
+  redis-data:
+  rabbitmq-data:
