@@ -1,7 +1,5 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Optional, Union
-import uuid
 import time
 
 class DownloadImageFromMinioError(Exception):
@@ -9,13 +7,14 @@ class DownloadImageFromMinioError(Exception):
     pass
 
 class InputParamsDownload:
-    def __init__(self, geojson_file, start_date, end_date):
-        self.geojson_file = geojson_file
+    def __init__(self, bbox, start_date, end_date, task_id):
+        self.bbox = bbox
         self.start_date = start_date
         self.end_date = end_date
-        self.id = str(uuid.uuid4()) 
+        self.id = task_id
         self.status = "initialized"
         self.created_at = time.time()
+        self.save_dir = f'/tmp/{task_id}'
 
 class DownloadImage(ABC):
     @abstractmethod
