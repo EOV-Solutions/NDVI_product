@@ -1,4 +1,4 @@
-from source.download_image_from_minio.download_image import DownloadImage, InputParamsDownload, DownloadImageFromMinioError
+from download_image import DownloadImage, InputParamsDownload, DownloadImageFromMinioError
 import os
 import zipfile
 from source.logger.Logger import app_logger as logging
@@ -10,7 +10,7 @@ CLOUD_PERCENTAGE = 100
 BANDS = ["B04", "B08"]
 HOST = 'http://10.0.1.79:8000/'#TODO: Sau clean lai dua vao config
 
-class DownloadS1ImageFromMinio(DownloadImage):
+class DownloadS2ImageFromMinio(DownloadImage):
       def download_image(self, input_params: InputParamsDownload) -> None:
         try:
             # Ví dụ: query STAC API cho Sentinel-1

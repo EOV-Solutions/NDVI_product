@@ -19,8 +19,6 @@ Step 3: From raster, create time series data (x, y, t)
 Step 4: Create json data include forward backward, with fields: values, deltas, masks, eval_masks
 """
 
-BIG_FOLDER = ""
-
 def fillNA(rvi_data_path, vh_data_path, rvi_full_path, vh_full_path):
     """
     Fill missing values (NaN) in RVI and VH datasets and save the results.
@@ -323,74 +321,11 @@ def create_json_data(path_to_data):
         rec = json.dumps(rec)
         fs.write(rec + '\n')
 
-    def download_collection(bucket_name, prefix, local_dir):
-        """Tải toàn bộ collection (prefix) từ MinIO về thư mục local"""
-        if not os.path.exists(local_dir):
-            os.makedirs(local_dir)
-        logging.info("da vao download collection")
-        # Lấy danh sách tất cả file trong prefix
-        s3 = boto3.client(
-            's3',
-        endpoint_url='http://minio:9000',
-            aws_access_key_id='ROOTNAME',
-            aws_secret_access_key='CHANGEME123',
-            config=Config(signature_version='s3v4'),
-            region_name='us-east-1'
-        )
-        response = s3.list_objects_v2(Bucket=bucket_name, Prefix=prefix)
-        for obj in response.get("Contents", []):
-            key = obj["Key"]
-            if key.endswith("/"):  # bỏ qua folder trống
-                continue
-            
-            # Tạo path local tương ứng
-            relative_path = key[len(prefix):] if key.startswith(prefix) else key
-            local_path = local_dir + relative_path
-            s3.download_file(bucket_name, key, local_path)
-            logging.info(f"Đã tải file {key} về {local_path}")
-        
-        logging.info(f"✅ Đã tải xong collection từ '{prefix}' về thư mục '{local_dir}'")
-  
-    def upload_file_infer(bucket_name, prefix, local_dir):
-        """
-        Upload a JSON file to MinIO.
-
-        Parameters:
-            bucket_name (str): Name of the MinIO bucket.
-            prefix (str): Prefix (folder path) in the bucket where the file will be uploaded.
-            local_dir (str): Local directory containing the JSON file to upload.
-        """
-        s3 = boto3.client(
-            's3',
-            endpoint_url='http://minio:9000',
-            aws_access_key_id='ROOTNAME',
-            aws_secret_access_key='CHANGEME123',
-            config=Config(signature_version='s3v4'),
-            region_name='us-east-1'
-        )
-        json_file_path = os.path.join(local_dir, 'data_infer.json')
-
-        if not os.path.exists(json_file_path):
-            logging.error(f"File {json_file_path} does not exist.")
-            return
-
-        minio_path = os.path.join(prefix, 'data_infer.json')
-
-        try:
-            with open(json_file_path, 'rb') as file_data:
-                s3.put_object(
-                    Bucket=bucket_name,
-                    Key=minio_path,
-                    Body=file_data,
-                    ContentType='application/json'
-                )
-            logging.info(f"Uploaded {json_file_path} to MinIO bucket {bucket_name} at {minio_path}")
-        except Exception as e:
-            logging.error(f"Failed to upload {json_file_path} to MinIO: {e}")
+    
 
             
     # TODO: Sua lai phan nay dau vao la lay duong dan ma download tu minio ve
-    region = "thaibinh" # sau đổi thành uuid của task
+    task_id = "thaibinh" # sau đổi thành uuid của task
 
     """
     Step create time series data
@@ -399,22 +334,9 @@ def create_json_data(path_to_data):
     if not os.path.exists('./app/data'):
         os.makedirs('./app/data')
         logging.info("Created data directory")
-    dir_ndvi = f'/app/data/{region}_ndvi8days'
-    dir_rvi = f'/app/data/{region}_rvi8days'
+    dir_ndvi = f'/app/data/{task_id}_ndvi8days'
+    dir_rvi = f'/app/data/{task_id}_rvi8days'
 
-    download_collection(
-        bucket_name='ndvi-raw',
-        prefix='thaibinh/thaibinh_ndvi8days',
-        local_dir=dir_ndvi
-    )
-
-    download_collection(
-        bucket_name='ndvi-raw',
-        prefix='thaibinh/thaibinh_rvi_8days',
-        local_dir=dir_rvi
-    )
-    # dir
-    # ndvi_raster_path = dir_ndvi
     
     ndvi_time_series_path = "/app/data/"+ 'ndvi_timeseries.npy'
     rvi_time_series_path = "/app/data/" + 'rvi_timeseries.npy'
@@ -573,7 +495,7 @@ def create_json_data(path_to_data):
     for id_ in range(all_len):
         parse_idTrain(id_)
     fs.close()
-    upload_file_infer(bucket_name='ndvi-processed', prefix='thaibinh/processed_data', local_dir='/app/data')
+    
     
     def cleanup_data_folder(data_folder):
         """

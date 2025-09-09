@@ -3,3 +3,5 @@ test.ipynb
 testdownl.py
 testdownls1.py
 logs
+data
+__pycache__

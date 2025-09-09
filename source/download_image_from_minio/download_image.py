@@ -14,7 +14,7 @@ class InputParamsDownload:
         self.id = task_id
         self.status = "initialized"
         self.created_at = time.time()
-        self.save_dir = f'/tmp/{task_id}'
+        self.save_dir = f'/mnt/storage/code/EOV_NDVI/BRIOS_v1-main/data/{task_id}/raw'
 
 class DownloadImage(ABC):
     @abstractmethod

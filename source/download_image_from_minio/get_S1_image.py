@@ -1,4 +1,4 @@
-from source.download_image_from_minio.download_image import DownloadImage, InputParamsDownload, DownloadImageFromMinioError
+from download_image import DownloadImage, InputParamsDownload, DownloadImageFromMinioError
 import os
 import zipfile
 from source.logger.Logger import app_logger as logging
