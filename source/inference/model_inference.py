@@ -106,7 +106,7 @@ def inference(DIR, model_path):
     np.save(os.path.join(DIR, 'infer.npy'), all_predictions)
     logging.info(f"Predictions saved for region")
 
-def model_npy_to_tiff(dir, minio_bucket_name):
+def model_npy_to_tiff(dir, minio_bucket_name=''):
     """
     Processes infer.npy and ndvi_timeseries.npy, combines them (if ground truth exists),
     and uploads the resulting TIFF files directly to MinIO S3 using minio_utils.
@@ -215,14 +215,14 @@ def model_npy_to_tiff(dir, minio_bucket_name):
 
         # TODO: Sau này có thể sửa thành upload MINIO theo chuẩn STAC và thực hiện đăng ký STAC API 
         # Upload bytes to MinIO using the utility function
-        success = upload_bytes_to_minio(
-            data_bytes=buffer.getvalue(), # Get the bytes content from the buffer
-            bucket_name=minio_bucket_name,
-            object_name=object_name,
-            content_type="image/tiff"
-        )
-        if not success:
-            logging.error(f"Failed to upload {object_name}. See previous logs for details.")
+        # success = upload_bytes_to_minio(
+        #     data_bytes=buffer.getvalue(), # Get the bytes content from the buffer
+        #     bucket_name=minio_bucket_name,
+        #     object_name=object_name,
+        #     content_type="image/tiff"
+        # )
+        # if not success:
+        #     logging.error(f"Failed to upload {object_name}. See previous logs for details.")
 
 
         

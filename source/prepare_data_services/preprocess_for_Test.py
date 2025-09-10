@@ -5,11 +5,11 @@ import os
 import rasterio
 from datetime import datetime, timedelta
 import json
-from logger.Logger import app_logger as logging
+from source.logger.Logger import app_logger as logging
 from io import BytesIO
-from minio.minio_utils import get_bucket, upload_file_to_minio, get_minio_s3_client
-import boto3
-from botocore.client import Config
+# from minio.minio_utils import get_bucket, upload_file_to_minio, get_minio_s3_client
+# import boto3
+# from botocore.client import Config
 import shutil
 
 """
@@ -101,7 +101,7 @@ def fillNA(rvi_data_path, vh_data_path, rvi_full_path, vh_full_path):
 
 
 
-def create_json_data(path_to_data):
+def create_json_data(root_path_data, task_id):
     
     def find_missing_date(list_ndvi, list_rvi):
         dates_ndvi = [f for f in list_ndvi if f.endswith('.tif')]
@@ -325,22 +325,24 @@ def create_json_data(path_to_data):
 
             
     # TODO: Sua lai phan nay dau vao la lay duong dan ma download tu minio ve
-    task_id = "thaibinh" # sau đổi thành uuid của task
+    # task_id = "thaibinh" # sau đổi thành uuid của task
 
     """
     Step create time series data
     ndvi_timeseries.shape = (x, y, t)
     """
-    if not os.path.exists('./app/data'):
+    if not os.path.exists('./app/data/'):
         os.makedirs('./app/data')
         logging.info("Created data directory")
-    dir_ndvi = f'/app/data/{task_id}_ndvi8days'
-    dir_rvi = f'/app/data/{task_id}_rvi8days'
+
+    # root_path_data lay tu root_dir, task_id lay tu id trong InputParamDownload.
+    dir_ndvi = f'{root_path_data}/processed/{task_id}_ndvi8days'
+    dir_rvi = f'{root_path_data}/processed/{task_id}_rvi_8days'
 
     
-    ndvi_time_series_path = "/app/data/"+ 'ndvi_timeseries.npy'
-    rvi_time_series_path = "/app/data/" + 'rvi_timeseries.npy'
-    vh_time_series_path = "/app/data/"+ 'vh_timeseries.npy'
+    ndvi_time_series_path = f"{root_path_data}/processed/"+ 'ndvi_timeseries.npy'
+    rvi_time_series_path = f"{root_path_data}/processed/" + 'rvi_timeseries.npy'
+    vh_time_series_path = f"{root_path_data}/processed/"+ 'vh_timeseries.npy'
     # print(ndvi_raster_path)
     # print(sar_raster_path)
     missing_date, date_rvi = find_missing_date(os.listdir(dir_ndvi), os.listdir(dir_rvi))
@@ -363,7 +365,7 @@ def create_json_data(path_to_data):
     """
     x, y, t = ndvi_data.shape
     coordinates = np.array([(i, j) for i in range(x) for j in range(y)])
-    np.save("/app/data/"+  'coordinates.npy', coordinates)
+    np.save(f"{root_path_data}/processed/" +  'coordinates.npy', coordinates)
 
 
     ndvi_data = ndvi_data.reshape((ndvi_data.shape[0] * ndvi_data.shape[1], ndvi_data.shape[2]))
@@ -488,7 +490,7 @@ def create_json_data(path_to_data):
     traindatasets_deltaBF = np.concatenate((traindatasets_deltaBF, traindatasets_delta_backward), axis=2)
 
     
-    path_to_file = "/app/data/"+'data_infer.json'
+    path_to_file = f"{root_path_data}/processed/"+"data_infer.json"
     fs = open(path_to_file, 'w')
     all_len = traindatasets_valuesF.shape[2]
     logging.info('Save training dataset as JSON')

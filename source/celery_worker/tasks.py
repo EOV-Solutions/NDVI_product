@@ -13,8 +13,12 @@ from celery_worker.helpers import time as time_helper
 from celery_worker.settings import celery_config, config
 from celery_worker.helpers.storage import create_path
 
+from download_image_from_minio.download_image import InputParamsDownload
+from download_image_from_minio.pipeline_download import pipeline_download
+from processing_raw_image.pipeline_process import processing_image
 from prepare_data_services.preprocess_for_Test import create_json_data
 from inference.model_inference import model_inference_NDVI
+
 from logger.Logger import app_logger as logging
 if not is_backend_running(): exit()
 if not is_broker_running(): exit()
@@ -23,27 +27,26 @@ if not is_broker_running(): exit()
 app = Celery(celery_config.QUERY_NAME, broker=config.BROKER, backend=config.REDIS_BACKEND)
 app.config_from_object('settings.celery_config')
 
-@app.task(bind=True, name="{query}.{task_name}".format(query=celery_config.QUERY_NAME, task_name=celery_config.PREPARE_TASK_NAME))
-def prepare_data_task(self, task_id: str, sync: bool):
+@app.task(bind=True, name="{query}.{task_name}".format(query=celery_config.QUERY_NAME, task_name=celery_config.FULL_PROCESS_INFERENCE))
+def full_process_task(self, task_id: str, sync: bool, input: InputParamsDownload):
+    # Step 1: Downloading data from ROI
+    logging.info(f"Starting download image")
+    pipeline_download(input)
+
+    # Step 2: Processing raw image 
+    logging.info("Starting processing raw image")
+    processing_image(input)
+
+    # Step 3: Prepare data for Inference
     logging.info(f"Starting prepare data task {task_id} ")
-    create_json_data()
-    logging.info("Ending prepare data task")
+    create_json_data(input.root_dir, input.id)
+    
+    # Step 4: Inference 
+    logging.info("Starting inference NDVI !!!!")
+    model_inference_NDVI(os.path.join(input.root_dir, 'processed'))
+
+
+
     redis.set(task_id, "running")
 
-@app.task(bind=True, name="{query}.{task_name}".format(query=celery_config.QUERY_NAME, task_name=celery_config.INFERENCE_TASK_NAME))
-def inference_task(self, task_id: str, sync: bool):
-    """
-    Task to perform inference on the prepared data.
-    """
-    try:
-        logging.info(f"Starting inference task {task_id}")
-        dir = '/app/data'
-        model_path = '/app/inference/model_file/brios_base_FINAL_extreme.pt'
-        minio = 'ndvi-infer'
-        model_inference_NDVI(dir, model_path, minio)
-        redis.set(task_id, "completed")
-        logging.info(f"Inference task {task_id} completed successfully")
-    except Exception as e:
-        redis.set(task_id, "failed")
-        logging.error(f"Inference task {task_id} failed: {str(e)}")
-        raise e
+

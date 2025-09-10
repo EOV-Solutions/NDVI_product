@@ -7,14 +7,10 @@ router = APIRouter(
     responses={404: {"description": "Not found"}},
 )
 
+@router.get("/ndvi_infer/full_process_inference")
+async def full_process_inference(background_tasks: BackgroundTasks):
+    return await service.full_process_inference(background_tasks)
 
-@router.post("/ndvi_infer/preprocess")
-async def preprocess(background_tasks: BackgroundTasks):
-    return await service.ndvi_preprocess(background_tasks)
-
-@router.post("/ndvi_infer/inference")
-async def inference(background_tasks: BackgroundTasks):
-    return await service.ndvi_inference(background_tasks)
 
 @router.get("/status/{task_id}", response_model=MlResult)
 def status(task_id: str,):

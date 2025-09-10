@@ -1,6 +1,7 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
 import time
+import os 
 
 class DownloadImageFromMinioError(Exception):
     """Custom exception for errors during image download from MinIO."""
@@ -14,7 +15,8 @@ class InputParamsDownload:
         self.id = task_id
         self.status = "initialized"
         self.created_at = time.time()
-        self.save_dir = f'/mnt/storage/code/EOV_NDVI/BRIOS_v1-main/data/{task_id}/raw'
+        self.root_dir = f'/mnt/storage/code/EOV_NDVI/BRIOS_v1-main/data/{task_id}'
+        self.save_dir = os.path.join(self.root_dir, 'raw')
 
 class DownloadImage(ABC):
     @abstractmethod

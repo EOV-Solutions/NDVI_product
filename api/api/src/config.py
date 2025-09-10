@@ -65,4 +65,5 @@ BROKER = "amqp://{user}:{pw}@{hostname}:{port}/{vhost}".format(
 # #=========================================================================
 PREPARE_TASK_NAME = 'prepare_task'
 INFERENCE_TASK_NAME = 'inference_task'
+FULL_PROCESS_TASK_NAMW = 'full_process_task'
 ML_QUERY_NAME = 'ndvi_inference_celery'

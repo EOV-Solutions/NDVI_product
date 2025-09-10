@@ -16,8 +16,10 @@ RUN pip install --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
 COPY ./celery_worker/ /app/celery_worker/
+COPY ./download_image_from_minio/ /app/download_image_from_minio
 COPY ./inference/ /app/inference/
 COPY ./logger/ /app/logger/
 COPY ./minio/ /app/minio/
 COPY ./prepare_data_services/ /app/prepare_data_services/
+COPY ./processing_raw_image/ /app/processing_raw_image
 COPY ./utils.py /app/utils.py

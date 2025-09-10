@@ -82,7 +82,7 @@ if __name__ == "__main__":
         task_id='abc'
     )
 
-    downloader_s1 = DownloadS1ImageFromMinio()
+    downloader_s1 = DownloadS2ImageFromMinio()
     logging.info(downloader_s1)
     a = downloader_s1.download_image(input_params)
     logging.info(a)

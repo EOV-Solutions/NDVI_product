@@ -30,3 +30,4 @@ result_expires = 60 * 60 * 48  # 48 hours in seconds
 # #=========================================================================
 PREPARE_TASK_NAME = CELERY['prepare_task_name']
 INFERENCE_TASK_NAME = CELERY['inference_task_name']
+FULL_PROCESS_INFERENCE = CELERY['full_process_inference']
