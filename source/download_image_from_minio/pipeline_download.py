@@ -1,5 +1,5 @@
-from get_S1_image import DownloadS1ImageFromMinio
-from get_S2_image import DownloadS2ImageFromMinio
+from download_image_from_minio.get_S1_image import DownloadS1ImageFromMinio
+from download_image_from_minio.get_S2_image import DownloadS2ImageFromMinio
 
 def pipeline_download(input_params):
     try:

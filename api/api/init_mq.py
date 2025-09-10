@@ -3,7 +3,7 @@ from src import config
 from celery import Celery
 from redis.sentinel import Sentinel
 
-REDIS_PASSWORD = 'eovdc@2025$%'
+REDIS_PASSWORD = 'EovdcRedis2025'
 
 sentinel = Sentinel(
     [('redis-sentinel.eovdc.svc.cluster.local', 26379)],

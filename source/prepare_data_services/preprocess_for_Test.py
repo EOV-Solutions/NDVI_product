@@ -5,7 +5,7 @@ import os
 import rasterio
 from datetime import datetime, timedelta
 import json
-from source.logger.Logger import app_logger as logging
+from logger.Logger import app_logger as logging
 from io import BytesIO
 # from minio.minio_utils import get_bucket, upload_file_to_minio, get_minio_s3_client
 # import boto3

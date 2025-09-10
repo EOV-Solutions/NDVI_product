@@ -1,7 +1,7 @@
 import rasterio
 from datetime import datetime
 import os 
-from processing_abstract import ProcessingImage
+from processing_raw_image.processing_abstract import ProcessingImage
 import numpy as np
 from logger.Logger import app_logger as logging
 """ 

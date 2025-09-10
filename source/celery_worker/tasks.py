@@ -28,7 +28,8 @@ app = Celery(celery_config.QUERY_NAME, broker=config.BROKER, backend=config.REDI
 app.config_from_object('settings.celery_config')
 
 @app.task(bind=True, name="{query}.{task_name}".format(query=celery_config.QUERY_NAME, task_name=celery_config.FULL_PROCESS_INFERENCE))
-def full_process_task(self, task_id: str, sync: bool, input: InputParamsDownload):
+def full_process_task(self, task_id: str, sync: bool, input_params: dict):
+    logging.info(f"input parmas: {input_params}")
     # Step 1: Downloading data from ROI
     logging.info(f"Starting download image")
     pipeline_download(input)

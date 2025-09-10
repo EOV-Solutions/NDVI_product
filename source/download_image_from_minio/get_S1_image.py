@@ -1,7 +1,7 @@
-from download_image import DownloadImage, InputParamsDownload, DownloadImageFromMinioError
+from download_image_from_minio.download_image import DownloadImage, InputParamsDownload, DownloadImageFromMinioError
 import os
 import zipfile
-from source.logger.Logger import app_logger as logging
+from logger.Logger import app_logger as logging
 import requests 
 from datetime import datetime 
 
@@ -26,7 +26,7 @@ class DownloadS1ImageFromMinio(DownloadImage):
             data = response.json()
 
             # DOWNLOAD 
-            api_download = f"{HOST}/v1/s1_download/{data["task_id"]}"
+            api_download = f"{HOST}/v1/s1_download/{data['task_id']}"
             save_dir = f"{input_params.save_dir}/sentinel1"
             os.makedirs(save_dir, exist_ok=True)
 
