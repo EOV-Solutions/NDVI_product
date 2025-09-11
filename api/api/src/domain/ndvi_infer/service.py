@@ -110,10 +110,23 @@ def test1(task_id: str, time: datetime, input_params: dict):
         # redis.set(task_id, json.dumps(data.__dict__))
 
 
+
 def get_status(task_id: str) -> MlResult:
     data = redis.get(task_id)
     if data is None:
         raise HTTPException(status_code=400, detail="Task not found")
-    message = json.loads(data)
 
-    return MlResult(**message)
+    # redis trả về bytes -> decode
+    message = json.loads(data.decode("utf-8"))
+
+    # ánh xạ các field con
+    status = MlStatusHandle(**message["status"]) if message.get("status") else None
+    time = MlTimeHandle(**message["time"]) if message.get("time") else None
+
+    return MlResult(
+        task_id=message["task_id"],
+        status=status,
+        time=time,
+        process_result=message.get("process_result"),
+        error=message.get("error")
+    )
