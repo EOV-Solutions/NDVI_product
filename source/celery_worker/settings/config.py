@@ -1,10 +1,13 @@
 import configparser
 import datetime
 import pytz 
+import os 
+from dotenv import load_dotenv
 
-
-cfg = configparser.ConfigParser(interpolation=None)
-cfg.read('./env.ini')
+# Load .env
+load_dotenv(".env")
+# cfg = configparser.ConfigParser(interpolation=None)
+# cfg.read('./env.ini')
 
 
 #=========================================================================
@@ -16,29 +19,29 @@ u = u.replace(tzinfo=pytz.timezone("Asia/Ho_Chi_Minh"))
 #=========================================================================
 #                          PROJECT INFORMATION 
 #=========================================================================
-PROJECT = cfg['project']
-BE_HOST = PROJECT['be_host']
-BE_PORT = PROJECT['be_port']
+# PROJECT = cfg['project']
+# BE_HOST = PROJECT['be_host']
+# BE_PORT = PROJECT['be_port']
 
 #=========================================================================
 #                          REDIS INFORMATION 
 #=========================================================================
-REDIS = cfg['redis']
+
+
 REDIS_BACKEND = "redis://:{password}@{hostname}:{port}/{db}".format(
-    hostname=REDIS['host'],
-    password=REDIS['pass'],
-    port=REDIS['port'],
-    db=REDIS['db']
+    hostname=os.getenv("REDIS_HOST","redis-sentinel.eovdc.svc.cluster.local"),
+    password=os.getenv("REDIS_PASS", "EovdcRedis2025"),
+    port=os.getenv("REDIS_PORT",  6379),
+    db=os.getenv("REDIS_DB", 1)
 )
 
 #=========================================================================
 #                          BROKER INFORMATION 
 #=========================================================================
-RABBITMQ = cfg['rabbitmq']
 BROKER = "amqp://{user}:{pw}@{hostname}:{port}/{vhost}".format(
-    user=RABBITMQ['user'],
-    pw=RABBITMQ['pass'],
-    hostname=RABBITMQ['host'],
-    port=RABBITMQ['post'],
-    vhost=RABBITMQ['vhost']
+    user=os.getenv("RABBITMQ_USER", "admin"),
+    pw=os.getenv("RABBITMQ_PASS", "rabbitmq123456"),
+    hostname=os.getenv("RABBITMQ_HOST","eov-rabbitmq-service.eovdc.svc.cluster.local"),
+    port=os.getenv("RABBITMQ_PORT","5672"),
+    vhost=os.getenv("RABBITMQ_VHOST", "")
 )

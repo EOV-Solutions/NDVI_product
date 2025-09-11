@@ -33,8 +33,27 @@ async def full_process_inference(bbox, start_date, end_date, background_tasks):
         "start_date": start_date,
         "end_date": end_date
     }
-    background_tasks.add_task(product_ndvi_full_process_background, task_id, time, data, input_params)
+    # background_tasks.add_task(product_ndvi_full_process_background, task_id, time, data, input_params)
+    product_ndvi_full_process_background(task_id, time, data, input_params)
     return MlResponse(status="PENDING", time=time, status_code=HTTP_200_OK, task_id=task_id)
+
+
+async def test(bbox, start_date, end_date, background_tasks):
+    time = now_utc()
+    task_id = str(uuid.uuid5(uuid.NAMESPACE_OID, config.ML_QUERY_NAME + "_" + str(time)))
+    time_handle = MlTimeHandle(start_process=str(time.timestamp())).__dict__
+    status_handle = MlStatusHandle().__dict__
+    data = MlResult(task_id=task_id, time=time_handle, status=status_handle)
+    redis.set(task_id, json.dumps(data.__dict__))
+    input_params = {
+        "bbox": bbox, 
+        "start_date": start_date,
+        "end_date": end_date
+    }
+    # background_tasks.add_task(product_ndvi_full_process_background, task_id, time, data, input_params)
+    test1(task_id, time, input_params)
+    return MlResponse(status="PENDING", time=time, status_code=HTTP_200_OK, task_id=task_id)
+
 
 
 
@@ -45,18 +64,21 @@ def product_ndvi_full_process_background(task_id: str, time: datetime, data: MlR
         data.time['start_process'] = str(time.timestamp())
         data_dump = json.dumps(data.__dict__)
         redis.set(task_id, data_dump)
-        print('start celery task')
+        print('start celery tas111k')
+
+        print(config.ML_QUERY_NAME, " ", config.FULL_PROCESS_TASK_NAME)
         celery_execute.send_task(
             name=config.ML_QUERY_NAME + "." + config.FULL_PROCESS_TASK_NAME,
             kwargs={
                 "task_id": task_id,
-                # "sync": False,
-                "input_params": json.dump(input_params.__dict__)
+                "input_params": input_params
             },
             queue = config.ML_QUERY_NAME
         )
         print('end celery task')
     except Exception as e:
+        print('bbb')
+        print(e)
         data.status['general_status'] = "FAILED"
         data.status['process_status'] = "FAILED"
         data.error = str(e)
@@ -64,8 +86,28 @@ def product_ndvi_full_process_background(task_id: str, time: datetime, data: MlR
 
 
 
+def test1(task_id: str, time: datetime, input_params: dict):
+    try: 
+        print('start test')
 
-
+        print(config.ML_QUERY_NAME, " ", config.TEST)
+        celery_execute.send_task(
+            name=config.ML_QUERY_NAME + "." + config.TEST,
+            kwargs={
+                "task_id": task_id,
+                # "sync": False,
+                "input_params": input_params
+            },
+            queue = config.ML_QUERY_NAME
+        )
+        print('end test')
+    except Exception as e:
+        print('bbb')
+        print(e)
+        # data.status['general_status'] = "FAILED"
+        # data.status['process_status'] = "FAILED"
+        # data.error = str(e)
+        # redis.set(task_id, json.dumps(data.__dict__))
 
 
 def get_status(task_id: str) -> MlResult:

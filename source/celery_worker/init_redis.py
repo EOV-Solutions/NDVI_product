@@ -2,22 +2,37 @@ from redis import Redis
 from redis.exceptions import ConnectionError
 from settings import config
 
+from redis.sentinel import Sentinel
+
+REDIS_PASSWORD = 'EovdcRedis2025'
 
 def is_backend_running() -> bool:
     try:
-        conn = Redis(
-            host=config.REDIS['host'],
-            port=int(config.REDIS['port']),
-            db=int(config.REDIS['db']),
-            password=config.REDIS['pass']
+        sentinel = Sentinel(
+            [('redis-sentinel.eovdc.svc.cluster.local', 26379)],
+            socket_timeout=0.5,
+            password=REDIS_PASSWORD,
+            sentinel_kwargs={"password": REDIS_PASSWORD}
         )
-        conn.client_list()  # Must perform an operation to check connection.
-        print("Successfully connected to Redis instance at %s", config.REDIS_BACKEND)
+
+        # Lấy master từ sentinel
+        conn = sentinel.master_for(
+            'mymaster',
+            socket_timeout=0.5,
+            password=REDIS_PASSWORD,
+            db=1
+        )
+
+        # test lệnh client_list
+        conn.client_list()
+        print(f"✅ Successfully connected to Redis master via Sentinel at {config.REDIS_BACKEND}")
     except ConnectionError as e:
-        print(config.REDIS['host'])
-        print(config.REDIS['pass'])
-        print("Failed to connect to Redis instance at %s", config.REDIS_BACKEND)
+        print(f"❌ Failed to connect to Redis via Sentinel at {config.REDIS_BACKEND}")
         print(repr(e))
         return False
+    except Exception as e:
+        print("⚠️ Unexpected error:", repr(e))
+        return False
+
     conn.close()
     return True

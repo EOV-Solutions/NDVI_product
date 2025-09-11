@@ -36,11 +36,11 @@ PORT = 8082
 #=========================================================================
 #                          REDIS INFORMATION 
 #=========================================================================
-# REDIS_HOST = 'redis-sentinel.eovdc.svc.cluster.local'
-REDIS_HOST = 'redis'
+REDIS_HOST = 'redis-sentinel.eovdc.svc.cluster.local'
+# REDIS_HOST = 'redis'
 REDIS_PORT = 6379
-# REDIS_PASSWORD = 'EovdcRedis2025'
-REDIS_PASSWORD = 'password'
+REDIS_PASSWORD = 'EovdcRedis2025'
+# REDIS_PASSWORD = 'password'
 REDIS_DB = 1
 REDIS_BACKEND = "redis://:{password}@{hostname}:{port}/{db}".format(
     hostname=REDIS_HOST,
@@ -54,11 +54,12 @@ REDIS_BACKEND = "redis://:{password}@{hostname}:{port}/{db}".format(
 #                          BROKER INFORMATION 
 #=========================================================================
 BROKER = "amqp://{user}:{pw}@{hostname}:{port}/{vhost}".format(
-    # user='admin',
-    # pw='rabbitmq123456',
-    user='guest',
-    pw='guest',
+    user='admin',
+    pw='rabbitmq123456',
+    # user='guest',
+    # pw='guest',
     hostname='eov-rabbitmq-service.eovdc.svc.cluster.local',
+    # hostname = 'rabbitmq',
     port=5672,
     vhost=''
 )
@@ -69,3 +70,4 @@ BROKER = "amqp://{user}:{pw}@{hostname}:{port}/{vhost}".format(
 # #=========================================================================
 FULL_PROCESS_TASK_NAME = 'full_process_task'
 ML_QUERY_NAME = 'ndvi_inference_celery'
+TEST = 'test'
