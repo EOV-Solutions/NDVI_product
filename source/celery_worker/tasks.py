@@ -18,79 +18,60 @@ from download_image_from_minio.pipeline_download import pipeline_download
 from processing_raw_image.pipeline_process import processing_image
 from prepare_data_services.preprocess_for_Test import create_json_data
 from inference.model_inference import model_inference_NDVI
+from datetime import datetime
 
 from logger.Logger import app_logger as logging
 if not is_backend_running(): exit()
 if not is_broker_running(): exit()
 
 from redis import Redis 
+import json 
+import time 
 
 app = Celery(celery_config.QUERY_NAME, broker=config.BROKER, backend=config.REDIS_BACKEND)
 app.config_from_object('settings.celery_config')
 
-import time
-import json 
-
-
-# def test():
-#     # Test trực tiếp Redis connection
-#     redis = Redis(
-#             host='redis',
-#             port=6379,
-#             db=1,
-#             password='password'
-#         )
-#     redis.set('test', 'testing redis')
-#     print("✅ Redis test key:", redis.get('test'))
-
-
-#     task_keys = redis.keys("celery-task-meta-*")
-
-#     print(f"Found {len(task_keys)} tasks in Redis:\n")
-
-#     # In thông tin từng task
-#     for key in task_keys:
-#         task_data = redis.get(key)
-#         if task_data:
-#             try:
-#                 task_info = json.loads(task_data)
-#             except Exception:
-#                 task_info = task_data  # nếu không parse được thì in raw
-#             print(f"Task key: {key}")
-#             print(f"Task data: {json.dumps(task_info, indent=2)}\n")
-
-# test()
+def update_status(task_id: str, task_status: dict, new_status: str, progress: float = None, message: str = None):
+    task_status['status'] = new_status
+    task_status['updated_at'] = datetime.utcnow()
+    if progress is not None:
+        task_status['progress'] = progress
+    if message:
+        task_status['message'] = message
+    redis.set(task_id, json.dumps(task_status, default=str)) 
 
 @app.task(bind=True, name="{query}.{task_name}".format(query=celery_config.QUERY_NAME, task_name=celery_config.FULL_PROCESS_INFERENCE))
-def full_process_task(self, task_id: str, input_params: dict):
-    # print(celery_config.QUERY_NAME," ", config.BROKER, " ", config.REDIS_BACKEND)
+def full_process_task(self, task_id: str, input_params: dict, task_status: dict):
     logging.info(f"input parmas: {input_params}")
     # Step 1: Downloading data from ROI
+    logging.info(task_status)
     logging.info(f"Starting download image")
-    print("test")
+    update_status(task_id, task_status, "DOWNLOAD", 20.0, None)
+    time.sleep(5)
     # pipeline_download(input)
 
+    
     # Step 2: Processing raw image 
     logging.info("Starting processing raw image")
+    update_status(task_id, task_status, "PROCESSING", 40.0, None)
+    time.sleep(5)
     # processing_image(input)
 
     # Step 3: Prepare data for Inference
     logging.info(f"Starting prepare data task {task_id} ")
+    update_status(task_id, task_status, "PREPARE", 60.0, None)
+    time.sleep(5)
     # create_json_data(input.root_dir, input.id)
     
     # Step 4: Inference 
     logging.info("Starting inference NDVI !!!!")
+    update_status(task_id, task_status, "INFERENCE", 80.0, None)
     # model_inference_NDVI(os.path.join(input.root_dir, 'processed'))
 
 
+    update_status(task_id, task_status, "SUCCESSFULL", 100.0, None)
+    # redis.set(task_id, "running")
 
-    redis.set(task_id, "running")
-
-
-@app.task(bind=True, name="{query}.{task_name}".format(query=celery_config.QUERY_NAME, task_name=celery_config.TEST))
-def ping(self, task_id: str, input_params: dict, **kwargs):
-    print(input_params)
-    return "pong"
 
 
 

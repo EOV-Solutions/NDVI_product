@@ -29,8 +29,8 @@ u = u.replace(tzinfo=pytz.timezone("Asia/Ho_Chi_Minh"))
 
 
 REDIS_BACKEND = "redis://:{password}@{hostname}:{port}/{db}".format(
-    hostname=os.getenv("REDIS_HOST","redis-sentinel.eovdc.svc.cluster.local"),
-    password=os.getenv("REDIS_PASS", "EovdcRedis2025"),
+    hostname=os.getenv("REDIS_HOST","redis"),
+    password=os.getenv("REDIS_PASS", "password"),
     port=os.getenv("REDIS_PORT",  6379),
     db=os.getenv("REDIS_DB", 1)
 )
@@ -39,9 +39,9 @@ REDIS_BACKEND = "redis://:{password}@{hostname}:{port}/{db}".format(
 #                          BROKER INFORMATION 
 #=========================================================================
 BROKER = "amqp://{user}:{pw}@{hostname}:{port}/{vhost}".format(
-    user=os.getenv("RABBITMQ_USER", "admin"),
-    pw=os.getenv("RABBITMQ_PASS", "rabbitmq123456"),
-    hostname=os.getenv("RABBITMQ_HOST","eov-rabbitmq-service.eovdc.svc.cluster.local"),
+    user=os.getenv("RABBITMQ_USER", "guest"),
+    pw=os.getenv("RABBITMQ_PASS", "guest"),
+    hostname=os.getenv("RABBITMQ_HOST","rabbitmq"),
     port=os.getenv("RABBITMQ_PORT","5672"),
     vhost=os.getenv("RABBITMQ_VHOST", "")
 )
