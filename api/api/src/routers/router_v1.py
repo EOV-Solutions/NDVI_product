@@ -1,6 +1,5 @@
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, UploadFile, File
-from ..domain.ndvi_infer.schemas import MlResult
 from ..domain.ndvi_infer import service
 from pydantic import BaseModel
 router = APIRouter(
@@ -22,17 +21,7 @@ async def full_process_inference(request: InferenceRequest, background_tasks: Ba
         background_tasks=background_tasks
     )
 
-@router.post("/ndvi_infer/test")
-async def test(request: InferenceRequest, background_tasks: BackgroundTasks):
-    return await service.test(
-        bbox=request.bbox,
-        start_date=request.start_date,
-        end_date=request.end_date,
-        background_tasks=background_tasks
-    )
 
-
-@router.get("/status/{task_id}", response_model=MlResult)
+@router.get("/status/{task_id}")
 def status(task_id: str,):
     return service.get_status(task_id)
-
