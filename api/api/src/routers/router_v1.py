@@ -1,6 +1,5 @@
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, UploadFile, File
-from ..domain.ndvi_infer.schemas import MlResult
 from ..domain.ndvi_infer import service
 from pydantic import BaseModel
 router = APIRouter(
